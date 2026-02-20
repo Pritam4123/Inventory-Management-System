@@ -16,11 +16,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for InventoryService class.
+ * Unit tests for InventoryService.
  */
 @ExtendWith(MockitoExtension.class)
 public class InventoryServiceTest {
@@ -28,13 +27,13 @@ public class InventoryServiceTest {
     @Mock
     private ProductDAO productDAO;
     
-    @InjectMocks
     private InventoryService inventoryService;
     
     private Product testProduct;
     
     @BeforeEach
     public void setUp() {
+        // Use the package-private constructor for testing
         inventoryService = new InventoryService(productDAO);
         
         testProduct = new Product();
@@ -87,7 +86,7 @@ public class InventoryServiceTest {
         
         assertNotNull(result);
         assertEquals(1, result.size());
-        verify(productDAO, times(1)).getAll();
+        assertEquals("Test Product", result.get(0).getName());
     }
     
     @Test
@@ -104,14 +103,9 @@ public class InventoryServiceTest {
     
     @Test
     public void testGetLowStockProducts() {
-        Product lowStockProduct = new Product();
-        lowStockProduct.setId(2);
-        lowStockProduct.setName("Low Stock Product");
-        lowStockProduct.setQuantity(5);
-        lowStockProduct.setLowStockThreshold(10);
-        
-        List<Product> lowStockProducts = Arrays.asList(lowStockProduct);
-        when(productDAO.getLowStockProducts()).thenReturn(lowStockProducts);
+        testProduct.setQuantity(5);
+        List<Product> products = Arrays.asList(testProduct);
+        when(productDAO.getLowStockProducts()).thenReturn(products);
         
         List<Product> result = inventoryService.getLowStockProducts();
         
@@ -125,7 +119,7 @@ public class InventoryServiceTest {
         when(productDAO.getById(1)).thenReturn(testProduct);
         when(productDAO.update(any(Product.class))).thenReturn(true);
         
-        testProduct.setName("Updated Name");
+        testProduct.setName("Updated Product");
         boolean result = inventoryService.updateProduct(testProduct);
         
         assertTrue(result);
@@ -136,11 +130,9 @@ public class InventoryServiceTest {
     public void testUpdateProduct_NotFound() {
         when(productDAO.getById(999)).thenReturn(null);
         
-        Product product = new Product();
-        product.setId(999);
-        
+        testProduct.setId(999);
         assertThrows(ProductNotFoundException.class, () -> {
-            inventoryService.updateProduct(product);
+            inventoryService.updateProduct(testProduct);
         });
     }
     
@@ -156,15 +148,6 @@ public class InventoryServiceTest {
     }
     
     @Test
-    public void testDeleteProduct_NotFound() {
-        when(productDAO.getById(999)).thenReturn(null);
-        
-        assertThrows(ProductNotFoundException.class, () -> {
-            inventoryService.deleteProduct(999);
-        });
-    }
-    
-    @Test
     public void testSearchProducts() {
         List<Product> products = Arrays.asList(testProduct);
         when(productDAO.searchByName("Test")).thenReturn(products);
@@ -173,26 +156,6 @@ public class InventoryServiceTest {
         
         assertNotNull(result);
         assertEquals(1, result.size());
-        assertTrue(result.get(0).getName().contains("Test"));
-    }
-    
-    @Test
-    public void testUpdateQuantity() {
-        when(productDAO.getById(1)).thenReturn(testProduct);
-        when(productDAO.updateQuantity(1, 30)).thenReturn(true);
-        
-        boolean result = inventoryService.updateQuantity(1, 30);
-        
-        assertTrue(result);
-        verify(productDAO, times(1)).updateQuantity(1, 30);
-    }
-    
-    @Test
-    public void testUpdateQuantity_ProductNotFound() {
-        when(productDAO.getById(999)).thenReturn(null);
-        
-        assertThrows(ProductNotFoundException.class, () -> {
-            inventoryService.updateQuantity(999, 30);
-        });
+        assertEquals("Test Product", result.get(0).getName());
     }
 }

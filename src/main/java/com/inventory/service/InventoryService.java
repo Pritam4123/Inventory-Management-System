@@ -20,6 +20,11 @@ public class InventoryService {
         this.productDAO = new ProductDAOImpl();
     }
     
+    // Package-private constructor for testing
+    InventoryService(ProductDAO productDAO) {
+        this.productDAO = productDAO;
+    }
+    
     /**
      * Add a new product to the inventory.
      * @param product the product to add

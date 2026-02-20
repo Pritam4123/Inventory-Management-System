@@ -30,6 +30,12 @@ public class SalesService {
         this.productDAO = new ProductDAOImpl();
     }
     
+    // Package-private constructor for testing
+    SalesService(SaleDAO saleDAO, ProductDAO productDAO) {
+        this.saleDAO = saleDAO;
+        this.productDAO = productDAO;
+    }
+    
     /**
      * Process a sale with automatic stock deduction.
      * Uses transaction to ensure data consistency.
